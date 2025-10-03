@@ -1,1 +1,82 @@
+def validate_isbn(isbn_string):
+    """Validate an ISBN-10 or ISBN-13 number.
+    
+    Args:
+        isbn_string (str): The ISBN to validate, with or without hyphens
+        
+    Returns:
+        bool: True if valid ISBN, False otherwise
+        
+    Raises:
+        TypeError: If isbn_string is not a string
+        
+    Examples:
+        >>> validate_isbn("978-0-123456-47-9")
+        True
+        >>> validate_isbn("invalid-isbn")
+        False
+    """
+    if not isinstance(isbn_string, str):
+        raise TypeError("ISBN must be a string")
+    
+    # Remove hyphens and spaces
+    clean_isbn = isbn_string.replace('-', '').replace(' ', '')
+    
+    if len(clean_isbn) == 10:
+        return _validate_isbn10(clean_isbn)
+    elif len(clean_isbn) == 13:
+        return _validate_isbn13(clean_isbn)
+    else:
+        return False"""
+
+
+
+def validate_experiment_parameters():
+
+def calculate_statistical_summary():
+    #Will intake the data given and will calculate the data given
+
+def parse_csv_data(csv_file):
+    #Reads the data in a CSV file, this data can be translated back out as an output later
+""" 
+    Args:
+        parse_csv_data (str): Whatever .csv file it is asked to read
+
+    Returns:
+        Outputs the data that is within the .csv file. 
+    
+    Raises: 
+        TypeError: If given string is not a csv file
+
+    
+    import csv
+    
+    #Verifies if extension tag is present
+    if csv_file.endswith(".csv") == False:
+        nu_csv = str(csv_file) + ".csv"
+    else: 
+        nu_csv = str(csv_file)
+
+
+    with open( nu_csv, 'r') as csv_file:
+        reader = csv.reader(nu_csv)
+
+        for row in reader:
+            print(row)
+
+   
+"""
+
+def input_csv(dict):
+    # Will append a .csv file if user wants to add to a csv file
+    """
+    Args:
+        
+    
+    
+    
+    """
+generate_data_report()
+anonymize_participant_data()
+validate_research_ethics_compliance()
 
