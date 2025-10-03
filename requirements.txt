@@ -1,3 +1,4 @@
+#Example: please delete later
 def validate_isbn(isbn_string):
     """Validate an ISBN-10 or ISBN-13 number.
     
@@ -67,16 +68,69 @@ def parse_csv_data(csv_file):
    
 """
 
-def input_csv(dict):
+def input_csv(dict, csv_file):
     # Will append a .csv file if user wants to add to a csv file
+    # Unfinished
     """
     Args:
-        
+        input_csv(dict, str): The dictionary, how many rows it has, what needs to be written into csv file
+
+    Returns:
+        Rewrites whatever dictionary would need to be into the .csv file
     
+    Raises: 
+        TypeError: If given string is not a csv file
+
     
+    import pandas as pd 
     
+
+    #Verifies if extension tag is present
+    if csv_file.endswith(".csv") == False:
+        nu_csv = str(csv_file) + ".csv"
+    else: 
+        nu_csv = str(csv_file)
+
+
+    with open( nu_csv, 'a') as csv_file:
+        writer = csv.writer(nu_csv)
+
+        for i in len(dict): 
+            writer.writerow(dict[i])
+
+     
     """
-generate_data_report()
+
+def generate_data_report():
+    # Will create a visualization of what data is put in
+    """
+    Args:
+        parse_csv_data (str): Whatever .csv file it is asked to read
+
+    Returns:
+        Outputs the data that is within the .csv file. 
+    
+    Raises: 
+        TypeError: If given string is not a csv file
+
+    
+    import csv
+    
+    #Verifies if extension tag is present
+    if csv_file.endswith(".csv") == False:
+        nu_csv = str(csv_file) + ".csv"
+    else: 
+        nu_csv = str(csv_file)
+
+
+    with open( nu_csv, 'r') as csv_file:
+        reader = csv.reader(nu_csv)
+
+        for row in reader:
+            print(row)
+
+    """
+
 anonymize_participant_data()
 validate_research_ethics_compliance()
 
