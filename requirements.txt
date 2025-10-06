@@ -1,7 +1,25 @@
 ##Please follow the template of what I have worked on at this point. 
 
+def directory_creation(directory_path : str):
+    # Will make directories that are dedicated to gathering the csv files. 
+    """
+    Args: directory_creation(directory_path): Will create a directory that gathers all downloaded research data
+    
+    Returns: Creates a folder in the directory 
 
+    Raises: Should not make an error
+    
+    import os
 
+    if not os.path.exists(directory_path):
+           os.makedirs(directory_path)   
+    
+    """
+
+def download_file(url):
+    #Will download the research data from a specified url
+
+    
 def validate_experiment_parameters():
 
 def calculate_statistical_summary():
