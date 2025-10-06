@@ -2,7 +2,7 @@
 
 ##Please follow the template of what I have worked on at this point. 
 
-def directory_creation(directory_path : str):
+'''def directory_creation(directory_path : str):
     # Will make directories that are dedicated to gathering the csv files. 
     """
     Args: directory_creation(directory_path): Will create a directory that gathers all downloaded research data
@@ -120,3 +120,5 @@ def generate_data_report(data, x:int, y:int, title:str):
 anonymize_participant_data()
 
 validate_research_ethics_compliance()
+
+'''
