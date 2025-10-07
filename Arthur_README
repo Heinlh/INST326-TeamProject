@@ -1,0 +1,123 @@
+
+##Please follow the template of what I have worked on at this point. 
+
+def directory_creation(directory_path : str):
+    # Will make directories that are dedicated to gathering the csv files. 
+    """
+    Args: directory_creation(directory_path): Will create a directory that gathers all downloaded research data
+    
+    Returns: Creates a folder in the directory 
+
+    Raises: Should not make an error
+    
+    import os
+
+    if not os.path.exists(directory_path):
+           os.makedirs(directory_path)   
+    
+    """
+
+def download_file(url):
+    #Will download the research data from a specified url
+
+    
+def validate_experiment_parameters():
+
+def calculate_statistical_summary():
+    #Will intake the data given and will calculate the data given
+
+def parse_csv_data(csv_file):
+    #Reads the data in a CSV file, this data can be translated back out as an output later
+""" 
+    Args:
+        parse_csv_data (str): Whatever .csv file it is asked to read
+
+    Returns:
+        Outputs the data that is within the .csv file. 
+    
+    Raises: 
+        TypeError: If given string is not a csv file
+
+    
+    import csv
+    
+    #Verifies if extension tag is present
+    if csv_file.endswith(".csv") == False:
+        nu_csv = str(csv_file) + ".csv"
+    else: 
+        nu_csv = str(csv_file)
+
+
+    with open( nu_csv, 'r') as csv_file:
+        reader = csv.reader(nu_csv)
+
+        for row in reader:
+            print(row)
+
+   
+"""
+
+def input_csv(dict, csv_file):
+    # Will append a .csv file if user wants to add to a csv file
+    # Unfinished
+    """
+    Args:
+        input_csv(dict, str): The dictionary, how many rows it has, what needs to be written into csv file
+
+    Returns:
+        Rewrites whatever dictionary would need to be into the .csv file
+    
+    Raises: 
+        TypeError: If given string is not a csv file
+
+    
+    import pandas as pd 
+    
+
+    #Verifies if extension tag is present
+    if csv_file.endswith(".csv") == False:
+        nu_csv = str(csv_file) + ".csv"
+    else: 
+        nu_csv = str(csv_file)
+
+
+    with open( nu_csv, 'a') as csv_file:
+        writer = csv.writer(nu_csv)
+
+        for i in len(dict): 
+            writer.writerow(dict[i])
+
+     
+    """
+
+def generate_data_report(data, x:int, y:int, title:str):
+    # Will create a visualization of what data is put in
+    """
+    Args:
+        generate_data_report()
+
+    Returns:
+        Outputs an analytical graph that is based off of the research data given  
+    
+    Raises: 
+        TypeError: If any data is missing or is unacceptable
+
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
+    import seaborn as sns
+
+    plt.figure(figsize = (10, 6))
+    sns.barplot(data, x, y)
+    plt.title(title)
+    plt.tight_layout()
+    plt.show()
+
+
+   
+    """
+
+anonymize_participant_data()
+
+validate_research_ethics_compliance()
+
+'''
