@@ -42,6 +42,9 @@ calculate_statistical_summary() - Produce a compact per-column summary (count, N
 enforce_schema() - Coerce/validate dtypes, datetime formats, allowed sets, nullability; return (df_out, report)
 apply_pipeline()- Run a list of transforms (filter/groupby/pivot/melt) with provenance; return (df_out, log)
 
+### Data Visualization (1 function)
+generate_data_report() - Create a basic visualization from processed data (e.g., a simple bar chart).
+
 ## Team Member Contributions
 
 **Nathanon ‘Tan’ Chaiyapan** - Data processing and transformation
@@ -98,45 +101,5 @@ INST326TeamProject/
 ```
 
 ---
-
-<<<<<<< HEAD
-### Data Visualization (1 function)
-generate_data_report() - Create a basic visualization from processed data (e.g., a simple bar chart).
-=======
-### Container Calculations
-```python
-from src.garden_library import calculate_container_area, calculate_soil_volume
-
-# Calculate area of rectangular raised bed
-area = calculate_container_area(48, 24, shape='rectangle')  # 1152 square inches
-
-# Calculate soil volume needed
-volume = calculate_soil_volume(48, 24, 8)  # 9216 cubic inches
-```
-
-### Plant Spacing
-```python
-from src.garden_library import determine_plant_capacity, calculate_plant_spacing
-
-# How many tomatoes fit in a 4x2 foot bed?
-capacity = determine_plant_capacity(48, 24, 18)  # 4 plants with 18" spacing
-
-# What spacing for 6 plants in same bed?
-spacing = calculate_plant_spacing(48, 24, 6)  # 12" spacing needed
-```
-
-### Seasonal Planning
-```python
-from src.garden_library import days_until_frost, is_safe_to_plant
-
-# Check planting safety based on frost dates
-safe = is_safe_to_plant('2024-04-15', last_frost='2024-04-20')  # False
-
-# Days remaining in growing season
-days = days_until_frost('2024-05-01', first_frost='2024-10-15')  # 167 days
-```
-
-## Function Library Overview
-
-Our library contains 15 specialized functions organized into four categories:
+'''
 
