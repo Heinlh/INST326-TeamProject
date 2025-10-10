@@ -305,3 +305,81 @@ result, log = apply_pipeline(df, steps)
 
 ---
 
+## Error Handling
+
+All functions include appropriate error handling:
+
+- **Input Validation:** Functions validate input parameters and raise `ValueError` with descriptive messages for invalid inputs.  
+- **Type Checking:** Critical parameters are checked to ensure correct types (e.g., DataFrame, dict, str).  
+- **Range Checking:** Numerical inputs (e.g., sample sizes, statistical thresholds) are validated for reasonable ranges.  
+- **Schema Enforcement:** Functions interacting with data structures confirm expected column names, dtypes, and integrity.  
+- **Logging Support:** Pipeline and validation functions optionally log all operations for debugging and reproducibility.  
+
+---
+
+## Usage Notes
+
+### File and Path Behavior
+- Default directories are created in the `"data/"` folder if not otherwise specified.  
+- All file paths are cross-platform compatible using `Pathlib`.  
+- When downloading or writing files, existing paths are validated before overwriting.
+
+### DataFrame Conventions
+- All tabular data uses **pandas DataFrames** as the standard format.  
+- Column names are case-sensitive unless standardized using `standardize_column_names()`.  
+- Missing data is reported consistently using `NaN` values.
+
+### Ethical Compliance
+- Personally identifiable information (PII) should be anonymized using `anonymize_participant_data()`.  
+- `validate_research_ethics_compliance()` should be applied before data sharing or publication.
+
+### Statistical and Visualization Defaults
+- Statistical functions summarize both numeric and categorical columns unless specified.  
+- Visualization functions (e.g., `generate_data_report()`) produce inline charts by default (via Matplotlib).  
+
+### Pipeline and Validation
+- Pipelines (`apply_pipeline`) process transformations in order and can export a reproducibility log.  
+- Validation and schema functions (`validate_experiment_parameters`, `enforce_schema`) ensure dataset and parameter consistency.  
+
+---
+
+## Integration Example
+
+Here’s how multiple functions from the library can work together in a real research workflow:
+
+```python
+from data_utils import *
+
+# 1. Prepare file system
+directory_creation("data/processed")
+
+# 2. Load raw CSV data
+df = parse_csv_data("data/raw/survey_data.csv")
+
+# 3. Clean and standardize
+df = standardize_column_names(df)
+df = clean_strings(df, ["participant_name", "city"])
+df = detect_missing(df)
+
+# 4. Enforce ethical standards
+validate_research_ethics_compliance(df, pii_cols=["email"], consent_col="consent")
+
+# 5. Apply validation schema
+schema = {"age": {"type": int, "range": (18, 99)}, "income": {"type": float}}
+df_validated, report = enforce_schema(df, schema)
+
+# 6. Run pipeline of transformations
+steps = [
+    {"op": "filter", "expr": "age > 21"},
+    {"op": "groupby_agg", "by": "city", "metrics": {"income": "mean"}}
+]
+final_df, pipeline_log = apply_pipeline(df_validated, steps)
+
+# 7. Generate summary and report
+summary = calculate_statistical_summary(final_df)
+generate_data_report(final_df, x="city", y="income", title="Average Income by City")
+
+print(summary.head())
+```
+
+This demonstrates how the library provides a complete, reproducible workflow for data acquisition, cleaning, validation, ethical compliance, and analysis.
