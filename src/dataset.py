@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 class Dataset:
-    """Encapsulates a pandas DataFrame and provides cleaning, QA, schema checks, and plotting."""
+    
 
     def __init__(self, data: pd.DataFrame, name: str = "dataset"):
         if not isinstance(data, pd.DataFrame):
@@ -20,7 +20,7 @@ class Dataset:
         self._df = data.copy()
         self._name = name
 
-    # ---- properties ----
+    
     @property
     def name(self) -> str:
         return self._name
@@ -29,7 +29,7 @@ class Dataset:
     def df(self) -> pd.DataFrame:
         return self._df.copy()
 
-    # ---- quality checks ----
+    
     def detect_missing(self, cols: Sequence[str] | None = None) -> pd.Series:
         if cols is not None:
             self._assert_cols(cols)
@@ -46,7 +46,7 @@ class Dataset:
         mask = self._df.duplicated(subset=subset, keep=False)
         return self._df.index[mask]
 
-    # ---- cleaning ----
+    
     def standardize_column_names(self, case: str = "snake") -> "Dataset":
         if not isinstance(case, str):
             raise TypeError("case must be a string")
@@ -122,7 +122,7 @@ class Dataset:
             out.loc[out[c].notna(), c] = "***"
         return Dataset(out, name=f"{self._name}::anonymized")
 
-    # ---- ethics ----
+    
     def validate_research_ethics_compliance(
         self,
         pii_cols: Sequence[str] | None = None,
@@ -153,7 +153,7 @@ class Dataset:
 
         return {"compliant": not issues, "issues": issues}
 
-    # ---- summaries ----
+    
     def calculate_statistical_summary(self, include_categoricals: bool = True) -> pd.DataFrame:
         frames: list[pd.DataFrame] = []
 
@@ -183,7 +183,7 @@ class Dataset:
             return pd.DataFrame()
         return pd.concat(frames, axis=0).sort_index()
 
-    # ---- schema enforcement ----
+    
     def enforce_schema(
         self,
         schema: Mapping[str, Mapping[str, Any]],
@@ -302,7 +302,7 @@ class Dataset:
 
         return Dataset(out, name=f"{self._name}::enforced"), report
 
-    # ---- plotting ----
+    
     def generate_data_report(self, x: str, y: str, title: str) -> plt.Figure:
         if self._df.empty:
             raise ValueError("DataFrame is empty; nothing to plot.")
@@ -320,7 +320,7 @@ class Dataset:
         plt.tight_layout()
         return fig
 
-    # ---- helpers / reprs ----
+    
     def _assert_cols(self, cols: Sequence[str], *, exc=ValueError) -> None:
         if not isinstance(cols, (list, tuple)):
             raise TypeError("cols must be a sequence of column names")
