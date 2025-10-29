@@ -1,5 +1,21 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any, Iterable, Mapping, Sequence, Union
+from urllib.parse import urlparse
+import csv
+
+import pandas as pd
+import requests
+
+from dataset import Dataset
+
+
+PathLike = Union[str, Path]
+
+
 class Researcher:
-    """Represents a researcher with a local workspace and data input/output utilities."""
+    """Represents a researcher with a local workspace and data IO utilities."""
 
     def __init__(self, name: str, workspace: PathLike = "data"):
         if not isinstance(name, str) or not name.strip():
@@ -16,7 +32,7 @@ class Researcher:
     def workspace(self) -> Path:
         return self._workspace
 
-    # ---- directory + download (from directory_creation, download_file)
+    # ---- directory + download
     def ensure_dir(self, relative: PathLike = "") -> Path:
         p = (self._workspace / Path(relative)).expanduser()
         p.mkdir(parents=True, exist_ok=True)
@@ -39,7 +55,7 @@ class Researcher:
         tmp.replace(final)
         return final
 
-    # ---- CSV read/append (parse_csv_data, input_csv)
+    # ---- CSV read/append
     def read_csv(self, csv_file: PathLike, **read_csv_kwargs) -> Dataset:
         p = Path(csv_file)
         if not p.is_absolute():
@@ -96,7 +112,7 @@ class Researcher:
         )
         return target
 
-    # ---- Ethics orchestration (using Dataset method)
+    # ---- ethics orchestration
     def ethics_report(
         self,
         dataset: Dataset,
@@ -106,7 +122,9 @@ class Researcher:
     ) -> dict:
         if not isinstance(dataset, Dataset):
             raise TypeError("dataset must be a Dataset")
-        return dataset.validate_research_ethics_compliance(pii_cols=pii_cols, consent_col=consent_col)
+        return dataset.validate_research_ethics_compliance(
+            pii_cols=pii_cols, consent_col=consent_col
+        )
 
     def __str__(self) -> str:
         return f"Researcher(name={self._name}, workspace={self._workspace})"
