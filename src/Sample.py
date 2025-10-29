@@ -5,7 +5,7 @@ import pandas as pd
 
 
 class Sample:
-    """A logical subset (row-slice) of a parent dataset for focused cleaning/QA."""
+    
 
     def __init__(self, data: pd.DataFrame, name: str = "sample"):
         if not isinstance(data, pd.DataFrame):
