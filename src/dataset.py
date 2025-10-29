@@ -1,6 +1,11 @@
 class Dataset:
-    """Encapsulates a pandas DataFrame and provides cleaning, QA, schema, and reporting."""
+    """Encapsulates a pandas DataFrame and provides cleaning, QA, schema validation, and plotting.
 
+   
+
+    """
+
+    # ---------- lifecycle ----------
     def __init__(self, data: pd.DataFrame, name: str = "dataset"):
         if not isinstance(data, pd.DataFrame):
             raise TypeError("data must be a pandas DataFrame")
@@ -9,27 +14,26 @@ class Dataset:
         self._df = data.copy()
         self._name = name
 
-    # ---- Properties
     @property
     def name(self) -> str:
-        """Dataset display name (read-only)."""
+        """Human-friendly dataset name (read-only)."""
         return self._name
 
     @property
     def df(self) -> pd.DataFrame:
-        """A defensive copy of the DataFrame to preserve encapsulation."""
+        """Defensive copy of the underlying DataFrame."""
         return self._df.copy()
 
-    # ---- Missing & duplicates
+    # ---------- quality checks ----------
     def detect_missing(self, cols: Sequence[str] | None = None) -> pd.Series:
-        """Report NA counts per column (optionally a subset)."""
+        """Count NA values per column (optionally on a subset)."""
         if cols is not None:
             self._assert_cols(cols)
             return self._df[cols].isna().sum()
         return self._df.isna().sum()
 
     def detect_duplicates(self, subset: Sequence[str] | None = None) -> pd.Index:
-        """Return index labels of duplicate rows (keep=False)."""
+        """Return index labels for rows that are duplicates (keep=False)."""
         if subset is not None:
             if not isinstance(subset, (list, tuple)):
                 raise TypeError("subset must be a sequence of column names or None")
@@ -39,9 +43,15 @@ class Dataset:
         mask = self._df.duplicated(subset=subset, keep=False)
         return self._df.index[mask]
 
-    # ---- Column standardization
+    # ---------- cleaning ----------
     def standardize_column_names(self, case: str = "snake") -> "Dataset":
-        """Return a new Dataset with normalized column names."""
+        """Return a new Dataset with normalized column names.
+
+        Supported cases: "snake", "kebab", "lower", "upper", "title".
+        Ensures uniqueness and handles blank-only names.
+        """
+        if not isinstance(case, str):
+            raise TypeError("case must be a string")
         case = case.lower().strip()
         allowed = {"snake", "kebab", "lower", "upper", "title"}
         if case not in allowed:
@@ -66,9 +76,9 @@ class Dataset:
                 return "".join(p.upper() for p in parts)
             if case == "title":
                 return "".join(p.capitalize() for p in parts)
-            return s
+            return s  # fallback (unreachable with validation)
 
-        # avoid collisions / blanks
+        # ensure uniqueness (avoid collisions/blanks)
         seen: Dict[str, int] = {}
         def uniq(s: str) -> str:
             base = s or "col"
@@ -80,7 +90,6 @@ class Dataset:
         out = self._df.rename(columns=dict(zip(self._df.columns, new_cols)))
         return Dataset(out, name=f"{self._name}::standardized[{case}]")
 
-    # ---- String cleaning
     def clean_strings(
         self,
         cols: Sequence[str],
@@ -109,7 +118,6 @@ class Dataset:
             out[c] = out[c].map(_clean_cell)
         return Dataset(out, name=f"{self._name}::clean_strings")
 
-    # ---- Anonymization
     def anonymize(self, cols: Sequence[str]) -> "Dataset":
         """Mask values in sensitive columns with '***' (returns new Dataset)."""
         self._assert_cols(cols, exc=KeyError)
@@ -118,13 +126,13 @@ class Dataset:
             out.loc[out[c].notna(), c] = "***"
         return Dataset(out, name=f"{self._name}::anonymized")
 
-    # ---- Ethics check
+    # ---------- ethics ----------
     def validate_research_ethics_compliance(
         self,
         pii_cols: Sequence[str] | None = None,
         consent_col: str | None = None,
     ) -> dict:
-        """Check that rows containing PII have consent (truthy in {1,true,yes,y})."""
+        """Check that rows with PII have consent (truthy in {1,true,yes,y})."""
         if pii_cols is None:
             pii_cols = []
         issues: list[str] = []
@@ -150,9 +158,9 @@ class Dataset:
 
         return {"compliant": not issues, "issues": issues}
 
-    # ---- Summary
+    # ---------- summaries ----------
     def calculate_statistical_summary(self, include_categoricals: bool = True) -> pd.DataFrame:
-        """Combined numeric + categorical column summary."""
+        """Produce combined numeric and (optional) categorical summaries per column."""
         frames: list[pd.DataFrame] = []
 
         num_cols = self._df.select_dtypes(include=["number"]).columns
@@ -183,14 +191,17 @@ class Dataset:
             return pd.DataFrame()
         return pd.concat(frames, axis=0).sort_index()
 
-    # ---- Schema enforcement
+    # ---------- schema enforcement ----------
     def enforce_schema(
         self,
         schema: Mapping[str, Mapping[str, Any]],
         *,
         strict: bool = False
     ) -> Tuple["Dataset", Dict[str, Any]]:
-        """Coerce types and validate nulls/allowed values according to a column schema."""
+        """Coerce types and validate nulls/allowed values according to a column schema.
+
+        Supported dtypes: "int", "float", "string", "bool", "datetime".
+        """
         if not isinstance(schema, dict):
             raise TypeError("schema must be a mapping (dict) of column -> rules")
 
@@ -311,9 +322,9 @@ class Dataset:
 
         return Dataset(out, name=f"{self._name}::enforced"), report
 
-    # ---- Simple bar chart
+    # ---------- plotting ----------
     def generate_data_report(self, x: str, y: str, title: str) -> plt.Figure:
-        """Bar chart of df[y] vs df[x] with validation; returns the Figure."""
+        """Bar chart of df[y] vs df[x] with validation (returns the Figure)."""
         if self._df.empty:
             raise ValueError("DataFrame is empty; nothing to plot.")
         if x not in self._df.columns or y not in self._df.columns:
@@ -330,7 +341,7 @@ class Dataset:
         plt.tight_layout()
         return fig
 
-    # ---- helpers
+    # ---------- helpers ----------
     def _assert_cols(self, cols: Sequence[str], *, exc=ValueError) -> None:
         if not isinstance(cols, (list, tuple)):
             raise TypeError("cols must be a sequence of column names")
