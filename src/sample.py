@@ -82,3 +82,46 @@ class Sample:
                 if collapse_spaces:
                     series = series.str.replace(r"\s+", " ", regex=True)
                 self.data[col] = series
+
+    def anonymize_participant_data(self, cols: Sequence[str]) -> None:
+        
+        missing = [c for c in cols if c not in self.data.columns]
+        if missing:
+            raise KeyError(f"Columns not found: {missing}")
+
+        for c in cols:
+            self.data.loc[self.data[c].notna(), c] = "***"
+
+    def validate_research_ethics_compliance(
+        self,
+        pii_cols: Sequence[str] | None = None,
+        consent_col: str | None = None,
+    ) -> dict:
+        
+        issues: list[str] = []
+        pii = list(pii_cols or [])
+
+        consent = (
+            self.data[consent_col]
+            .astype(str)
+            .str.lower()
+            .isin({"1", "true", "yes", "y"})
+            if (consent_col and consent_col in self.data.columns)
+            else None
+        )
+
+        for c in pii:
+            if c not in self.data.columns or not self.data[c].notna().any():
+                continue
+            if consent is None:
+                issues.append(f"PII detected in '{c}' without a consent column")
+            else:
+                n = int((self.data[c].notna() & ~consent).sum())
+                if n:
+                    issues.append(f"{n} row(s) with PII in '{c}' without consent")
+
+        return {"compliant": not issues, "issues": issues}
+
+    def get_data(self) -> pd.DataFrame:
+        
+        return self.data.copy()
