@@ -122,6 +122,139 @@ class Sample:
 
         return {"compliant": not issues, "issues": issues}
 
+    def enforce_schema(
+        self,
+        schema: Mapping[str, Mapping[str, Any]],
+    ) -> Dict[str, Any]:
+        
+        if not isinstance(schema, dict):
+            raise TypeError("schema must be a mapping (dict) of column -> rules")
+
+        supported_dtypes = {"int", "float", "string", "bool", "datetime"}
+        report: Dict[str, Any] = {
+            "coercions": {},
+            "invalid_nulls": {},
+            "invalid_values": {},
+            "errors": [],
+        }
+
+        def coerce_bool(series: pd.Series) -> pd.Series:
+            mapping_true = {"true", "t", "1", "yes", "y"}
+            mapping_false = {"false", "f", "0", "no", "n"}
+
+            def _to_bool(x):
+                if pd.isna(x):
+                    return np.nan
+                if isinstance(x, bool):
+                    return x
+                s = str(x).strip().lower()
+                if s in mapping_true:
+                    return True
+                if s in mapping_false:
+                    return False
+                return np.nan
+
+            coerced = series.map(_to_bool)
+            return coerced.astype("boolean")
+
+        for col, rules in schema.items():
+            if not isinstance(rules, dict):
+                report["errors"].append(f"Rules for column '{col}' must be a dict.")
+                continue
+
+            dtype = rules.get("dtype")
+            if dtype not in supported_dtypes:
+                report["errors"].append(
+                    f"Column '{col}': unsupported dtype '{dtype}'. "
+                    f"Supported: {sorted(supported_dtypes)}"
+                )
+                continue
+
+            nullable = bool(rules.get("nullable", False))
+            dt_fmt = rules.get("datetime_format", None)
+            allowed_values = set(rules.get("allowed", set()))
+
+            if col not in self.data.columns:
+                report["errors"].append(f"Missing expected column: '{col}'")
+                self.data[col] = pd.Series([pd.NA] * len(self.data), index=self.data.index)
+
+            before = self.data[col].copy()
+
+            try:
+                
+                if dtype == "string":
+                    self.data[col] = self.data[col].astype("string")
+                elif dtype == "int":
+                    self.data[col] = pd.to_numeric(self.data[col], errors="coerce")
+                    if nullable:
+                        self.data[col] = self.data[col].astype("Int64")
+                    else:
+                        if self.data[col].isna().any():
+                            pass 
+                        else:
+                            self.data[col] = self.data[col].astype("int64")
+                elif dtype == "float":
+                    self.data[col] = pd.to_numeric(self.data[col], errors="coerce").astype("Float64")
+                elif dtype == "bool":
+                    self.data[col] = coerce_bool(self.data[col])
+                    if not nullable and not self.data[col].isna().any():
+                        self.data[col] = self.data[col].astype(bool)
+                elif dtype == "datetime":
+                    if dt_fmt is None:
+                        self.data[col] = pd.to_datetime(self.data[col], errors="coerce", utc=False)
+                    else:
+                        fmts = dt_fmt if isinstance(dt_fmt, (list, tuple)) else [dt_fmt]
+                        parsed = pd.Series(pd.NaT, index=self.data.index, dtype="datetime64[ns]")
+                        raw = self.data[col]
+                        for fmt in fmts:
+                            mask = parsed.isna()
+                            if not mask.any():
+                                break
+                            parsed.loc[mask] = pd.to_datetime(
+                                raw.loc[mask], format=fmt, errors="coerce", utc=False
+                            )
+                        still = parsed.isna()
+                        if still.any():
+                            parsed.loc[still] = pd.to_datetime(
+                                raw.loc[still], errors="coerce", utc=False
+                            )
+                        self.data[col] = parsed
+
+                
+                if not before.equals(self.data[col]):
+                    report["coercions"].setdefault(col, []).append("Type coerced")
+
+                
+                if not nullable and self.data[col].isna().any():
+                    invalid_null_count = self.data[col].isna().sum()
+                    report["invalid_nulls"].setdefault(col, []).append(
+                        f"Found {invalid_null_count} null(s) in non-nullable column."
+                    )
+
+               
+                if allowed_values:
+                    
+                    allowed_values_coerced = [
+                        (pd.to_datetime(v, errors='coerce', format=fmts[0], utc=False) if dtype == 'datetime' and fmts else pd.to_datetime(v, errors='coerce', utc=False)) if dtype == 'datetime'
+                        else coerce_bool(pd.Series([v]))[0] if dtype == 'bool'
+                        else v
+                        for v in allowed_values
+                    ]
+
+                    invalid_mask = self.data[col].notna() & ~self.data[col].isin(allowed_values_coerced)
+                    if invalid_mask.any():
+                        invalid_count = invalid_mask.sum()
+                        report["invalid_values"].setdefault(col, []).append(
+                            f"Found {invalid_count} row(s) with values not in allowed set."
+                        )
+
+            except Exception as e:
+                report["errors"].append(f"Coercion or validation error for '{col}': {e}")
+                self.data[col] = before 
+
+        return report
+
+
     def get_data(self) -> pd.DataFrame:
         
         return self.data.copy()
