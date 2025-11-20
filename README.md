@@ -94,9 +94,16 @@ INST326TeamProject/
 ├── README.md
 ├── src/
 │   ├── __init__.py
+│   ├── AbstractExperiment.py
+│   ├── analysis.py
+│   ├── dataset.py
+│   ├── research_project_functions.py
+│   ├── researcher.py
+│   ├── sample.py
 ├── docs/
 │   ├── function_reference.md
 │   └── usage_examples.md
+│   └── architecture.md
 └── requirements.txt
 ```
 
