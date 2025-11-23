@@ -131,6 +131,22 @@ Our library contains 15 specialized functions organized into five categories:
 - `apply_pipeline()` – Run sequential data transformations with logging  
 
 ---
+## Key Features
+
+### 1. Polymorphic Behavior
+- `access_policy()` - Gives information about who may access the data results of the given experiment
+- `process()` - Runs the results through a specific pipeline to give a dataset.
+
+### 2. Abstract Base Classes
+
+- **AbstractExperiment** requires the experiment_id and title with also an existing dataset to process the experiment.
+
+### 3. Composition over Inheritance 
+- ResearchProject represents a project that can have multiple different experiments
+- Options given to add experiments by their experiment_id and to return all given policies
+- ResearchProject's relationship with experiments is strictly "has-a"
+
+---
 
 ## Team Member Contributions
 
