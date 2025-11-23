@@ -166,14 +166,14 @@ ResearchProject contains and coordinates many objects:
 ### Balancing Inheritance vs. Composition
 #### Use Inheritance When:
 
-Clear "is-a" relationship exists
-Shared behavior across types
-Polymorphic behavior needed
+- Clear "is-a" relationship exists
+- Shared behavior across types
+- Polymorphic behavior needed
 #### Use Composition When:
 
-"Has-a" relationship exists
-Coordinating multiple types
-Relationship more important than type
+- "Has-a" relationship exists
+- Coordinating multiple types
+- Relationship more important than type
 
 ---
 
