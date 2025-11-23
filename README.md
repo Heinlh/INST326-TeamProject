@@ -147,6 +147,35 @@ Our library contains 15 specialized functions organized into five categories:
 - ResearchProject's relationship with experiments is strictly "has-a"
 
 ---
+## Design Decisions
+
+### Inherence Justification
+
+Although each experiment shares similar experimentid practices and uses the same format for datasets: 
+- Each experiment has different policies that come with it, such as how **Survey**s come with ethical liabilities
+- Each experiment has a different process in how the results are organized
+- Each experiment can request additional parameters
+
+### Composition Justification
+
+ResearchProject contains and coordinates many objects:
+- It is not an experiment, it contains them
+- Does not inherent from experiments
+- It requires an interdependent relationship with given experiments
+
+### Balancing Inheritance vs. Composition
+#### Use Inheritance When:
+
+Clear "is-a" relationship exists
+Shared behavior across types
+Polymorphic behavior needed
+#### Use Composition When:
+
+"Has-a" relationship exists
+Coordinating multiple types
+Relationship more important than type
+
+---
 
 ## Team Member Contributions
 
