@@ -144,9 +144,9 @@
 
 | Pattern | Where Used | Why |
 |---------|-----------|-----|
-| **Abstract Base Class** | AbstractPlantingContainer, AbstractPlant | Enforce interface contracts |
-| **Inheritance** | Container/Plant hierarchies | Code reuse + polymorphism |
+| **Abstract Base Class** | AbstractExperiment | Enforce interface contracts |
+| **Inheritance** | Experiment hierarchies | Code reuse + polymorphism |
 | **Polymorphism** | All calculate/get methods | Type-specific behavior |
-| **Composition** | GardenManager, GardenCell | Flexible relationships |
+| **Composition** | ResearchProject | Flexible relationships |
 | **Template Method** | Abstract methods | Define algorithm structure |
 
