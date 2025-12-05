@@ -22,7 +22,7 @@ from researcher import Researcher
 from Sample import Sample
 from dataset import Dataset
 from analysis import Analysis
-from experiments import (
+from experiment import (
     AbstractExperiment,
     Experiment,
     LabExperiment,
