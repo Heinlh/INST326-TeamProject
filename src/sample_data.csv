@@ -1,0 +1,6 @@
+User, Amount , City , pH , mass_mg, temperature_c , Name , Email , Consent 
+1, 4 ," ""A "" ",7.1,12.5,22.0,Alice,alice@example.com,YES
+1,-5," ""A""",7.0,thirteen,22.5, Bob ,bob@example.com,no
+2,"""3"""," ""B "" ",6.8,15.2,,Carol,,Yes
+2,7," "" B""",6.9,14.8,23.1,  David  ,david@example.com,NO
+3,""" """,C,7.2,missing,21.8,Eve,eve@example.com,yes
