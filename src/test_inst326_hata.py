@@ -9,6 +9,104 @@ Covers:
 - Experiments hierarchy (ABC, inheritance, polymorphism, composition)
 """
 
+"""
+TESTING STRATEGY AND CLASSIFICATION
+-----------------------------------
+
+This test suite follows the INST326 Project 4 requirements for:
+- Unit Tests
+- Integration Tests
+- System Tests
+
+Below is a classification to help graders quickly identify coverage.
+
+======================================================================
+UNIT TESTS (Isolated components, method-level behavior)
+======================================================================
+
+Dataset:
+    - test_detect_missing
+    - test_detect_duplicates
+    - test_standardize_column_names_snake_case
+    - test_clean_strings
+    - test_anonymize
+    - test_enforce_schema_basic
+    - test_generate_data_report
+    - test_generate_data_report_invalid_column_raises
+
+Researcher:
+    - test_ensure_dir_creates_subdir
+    - test_read_csv_missing_file_raises
+    - test_download_file_invalid_scheme_raises
+
+Sample:
+    - test_init_requires_dataframe
+    - test_sample_has_independent_copy
+
+Analysis:
+    - test_run_pipeline_missing_column_in_select_raises
+    - test_summarize_delegates_to_dataset
+    - test_plot_bar_delegates_to_dataset
+
+Experiments (Behavior of concrete classes):
+    - test_abstract_experiment_cannot_be_instantiated
+    - test_inheritance_hierarchy
+    - test_access_policy_polymorphism
+    - test_process_dataset_polymorphism
+
+----------------------------------------------------------------------
+These tests validate internal correctness of individual classes
+without relying on external dependencies or multi-component workflows.
+----------------------------------------------------------------------
+
+
+======================================================================
+INTEGRATION TESTS (Interactions between 2+ components)
+======================================================================
+
+Researcher + Dataset:
+    - test_append_and_read_csv_roundtrip
+    - test_ethics_report_delegates_to_dataset
+
+Analysis + Dataset:
+    - test_run_simple_filter_and_groupby_pipeline
+
+Experiments + Dataset + Polymorphism:
+    - test_render_overview_polymorphic
+    - test_research_project_composition
+
+Analysis + Experiment:
+    - test_full_pipeline_lab_experiment (partial system-level behavior)
+
+----------------------------------------------------------------------
+These tests ensure that independent modules coordinate correctly,
+verifying data flow, delegation, and object relationships.
+----------------------------------------------------------------------
+
+
+======================================================================
+SYSTEM TESTS (End-to-end workflows, I/O + processing + pipeline)
+======================================================================
+
+1. test_full_pipeline_lab_experiment
+    - Loads dataset into experiment, processes it, runs analysis.
+
+2. test_project_overview_and_policies
+    - High-level composition of multiple experiments under a project.
+
+3. test_end_to_end_research_workflow  <-- NEW FULL SYSTEM TEST
+    - Researcher writes CSV → loads → attaches to experiment →
+      processes → pipeline transforms → writes output file →
+      validates data + persistence.
+
+----------------------------------------------------------------------
+These tests simulate realistic user workflows touching the entire system:
+IO, Dataset management, Experiments, Analysis, and filesystem persistence.
+----------------------------------------------------------------------
+
+"""
+
+
 import os
 import csv
 import tempfile
@@ -141,8 +239,13 @@ class TestResearcher(unittest.TestCase):
     def tearDown(self):
         self.tmpdir.cleanup()
 
-   
-    
+    def test_ensure_dir_creates_subdir(self):
+        """ensure_dir should create and return a subdirectory under workspace."""
+        sub = self.researcher.ensure_dir("subdir")
+        self.assertTrue(sub.exists())
+        self.assertTrue(sub.is_dir())
+        self.assertTrue(str(sub).startswith(str(self.workspace)))
+
     def test_append_and_read_csv_roundtrip(self):
         """append_csv followed by read_csv should preserve rows and columns."""
         rows = [
@@ -422,6 +525,74 @@ class TestSystemIntegration(unittest.TestCase):
         self.assertIn("FieldStudy(F1)", overview)
         self.assertIn("Survey(S1)", overview)
 
+    def test_end_to_end_research_workflow(self):
+        """
+        System Test:
+        Complete end-to-end research workflow including:
+
+        - Researcher creates a workspace and writes raw CSV
+        - Researcher loads CSV into a Dataset
+        - Dataset is attached to a LabExperiment
+        - LabExperiment processes the dataset
+        - Analysis pipeline runs transformations
+        - Researcher writes final processed dataset back to CSV
+
+        This test touches I/O, dataset cleaning, experiment processing,
+        analysis pipelines, and filesystem persistence.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = Path(tmp)
+            r = Researcher("Alice", workspace=ws)
+
+            # Step 1: Write raw CSV input
+           
+            input_rows = [
+            {"user": 1, "amount": 4, "city": "A"},
+             {"user": 1, "amount": -5, "city": "A"},
+            {"user": 2, "amount": 3, "city": "B"},
+            {"user": 2, "amount": 7, "city": "B"},]
+
+            input_path = r.append_csv(input_rows, "raw_data.csv")
+
+            # Step 2: Load dataset
+            ds = r.read_csv("raw_data.csv")
+
+            # Step 3: Attach dataset to experiment
+            lab = LabExperiment("L100", "Lab System Test", biosafety_level=2)
+            lab.attach_dataset(ds.df, name="lab_raw")
+
+            # Step 4: Process experiment dataset
+            processed = lab.process_dataset(ds)
+            self.assertIsInstance(processed, Dataset)
+
+            # Step 5: Run analysis pipeline
+            pipe = Analysis(
+                name="sys_pipeline",
+                steps=[
+                    {"op": "filter", "expr": "amount >= 0"},
+                    {"op": "groupby_agg", "by": ["user"], "metrics": {"amount": "sum"}},
+                    {"op": "sort", "by": ["amount"], "ascending": False},
+                ]
+            )
+            final_ds, log = pipe.run_pipeline(processed)
+
+            # Expected: user=2 has highest total amount: 3+7 = 10
+            self.assertEqual(final_ds.df.iloc[0]["user"], 2)
+            self.assertEqual(final_ds.df.iloc[0]["amount"], 10)
+            self.assertGreater(len(log), 0)
+
+            # Step 6: Save final dataset
+            output_path = r.write_csv(final_ds, "final_output.csv")
+            self.assertTrue(output_path.exists())
+
+            # Step 7: Validate saved contents
+            reloaded = r.read_csv("final_output.csv")
+            self.assertIn("user", reloaded.df.columns)
+            self.assertIn("amount", reloaded.df.columns)
+            self.assertEqual(len(reloaded.df), 2)  # two users in totals
+
+            # System test complete successfully
 
 if __name__ == "__main__":
     unittest.main()
