@@ -251,6 +251,10 @@ INST326-TeamProject/
 ```
 
 ---
+## Project Presentation Video
+https://youtu.be/3hNX_LMmPks
+
+---
 
 **Note:**  
 This project demonstrates proper function library development for INST326, showcasing modular programming, documentation best practices, reproducibility, and ethical data handling.
